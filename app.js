@@ -2,6 +2,11 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Define routes and middleware here
+// Define route handler for the root path
+app.get('/', (req, res) => {
+  res.send('Hello World!');
+});
 
-module.exports = app; // Export the Express application instance
+// Export the Express application instance
+module.exports = app;
+
