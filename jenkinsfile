@@ -16,11 +16,23 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy to Development') {
+            when {
+                branch 'dev-test-nodejs'
+            }
             steps {
-                echo 'Deploying the Node.js application...'
-                // Add deployment steps here
-                // For example, deploy to a server or a cloud platform
+                echo 'Deploying the Node.js application to development environment...'
+                // Add deployment steps for development environment here
+            }
+        }
+
+        stage('Deploy to Production') {
+            when {
+                branch 'prod-test-nodejs'
+            }
+            steps {
+                echo 'Deploying the Node.js application to production environment...'
+                // Add deployment steps for production environment here
             }
         }
     }
