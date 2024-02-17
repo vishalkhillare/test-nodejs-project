@@ -1,11 +1,7 @@
 const express = require('express');
 const app = express();
-const port = 3001; // Change the port to 3001
+const port = process.env.PORT || 3000;
 
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
+// Define routes and middleware here
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
+module.exports = app; // Export the Express application instance
