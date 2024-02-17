@@ -1,23 +1,19 @@
 pipeline {
     agent any
 
-    environment {
-        NODEJS_HOME = 'C:\\Program Files\\nodejs'
-        PATH = "$NODEJS_HOME;$PATH"
-    }
-
     stages {
         stage('Build') {
             steps {
                 echo 'Building the app.js application...'
-                bat 'npm install'
+                bat label: 'npm install', script: '"C:\\Program Files\\nodejs\\npm" install'
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                bat 'npm test'| echo "Tests completed successfully"'
+                bat label: 'npm test', script: '"C:\\Program Files\\nodejs\\npm" test'
+                echo "Tests completed successfully"
             }
         }
 
