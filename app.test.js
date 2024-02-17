@@ -1,11 +1,11 @@
 const request = require('supertest');
-const app = require('./app'); // Import the Express application instance
+const app = require('./app');
 
 describe('GET /', () => {
   let server;
 
   beforeAll((done) => {
-    server = app.listen(3000, () => {
+    server = app.listen(3000, () => { // Update the port to match your app.js file
       console.log('Server started');
       done();
     });
