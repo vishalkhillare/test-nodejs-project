@@ -5,14 +5,15 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the app.js application...'
-                sh 'npm install'
+                bat label: 'npm install', script: '"C:\\Program Files\\nodejs\\npm" install'
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                sh 'npm test'
+                bat label: 'npm test', script: '"C:\\Program Files\\nodejs\\npm" test'
+                echo "Tests completed successfully"
             }
         }
 
