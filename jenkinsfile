@@ -53,7 +53,7 @@ stage('Deploy to Development') {
     }
     steps {
         echo 'Deploying the Node.js application to development environment...'
-        withCredentials([sshUserPrivateKey(credentialsId: 'e6d0a208-fc80-4074-a289-fe80421fc82d', keyFileVariable: 'KEYFILE')]) {
+        withCredentials([sshUserPrivateKey(credentialsId: 'abf3232c-91aa-4818-9714-0b694531a4c6', keyFileVariable: 'KEYFILE')]) {
             // Use the SSH private key to authenticate and transfer files
             sh '''
                 ssh -i $KEYFILE user@development-server 'commands to transfer files and restart services'
@@ -68,7 +68,7 @@ stage('Deploy to Production') {
     }
     steps {
         echo 'Deploying the Node.js application to production environment...'
-        withCredentials([sshUserPrivateKey(credentialsId: 'e6d0a208-fc80-4074-a289-fe80421fc82d', keyFileVariable: 'KEYFILE')]) {
+        withCredentials([sshUserPrivateKey(credentialsId: 'abf3232c-91aa-4818-9714-0b694531a4c6d', keyFileVariable: 'KEYFILE')]) {
             // Use the SSH private key to authenticate and transfer files
             sh '''
                 ssh -i $KEYFILE user@production-server 'commands to transfer files and restart services'
