@@ -47,3 +47,32 @@ pipeline {
         }
     }
 }
+stage('Deploy to Development') {
+    when {
+        branch 'dev-test-nodejs'
+    }
+    steps {
+        echo 'Deploying the Node.js application to development environment...'
+        withCredentials([sshUserPrivateKey(credentialsId: 'e6d0a208-fc80-4074-a289-fe80421fc82d', keyFileVariable: 'KEYFILE')]) {
+            // Use the SSH private key to authenticate and transfer files
+            sh '''
+                ssh -i $KEYFILE user@development-server 'commands to transfer files and restart services'
+            '''
+        }
+    }
+}
+
+stage('Deploy to Production') {
+    when {
+        branch 'prod-test-nodejs'
+    }
+    steps {
+        echo 'Deploying the Node.js application to production environment...'
+        withCredentials([sshUserPrivateKey(credentialsId: 'e6d0a208-fc80-4074-a289-fe80421fc82d', keyFileVariable: 'KEYFILE')]) {
+            // Use the SSH private key to authenticate and transfer files
+            sh '''
+                ssh -i $KEYFILE user@production-server 'commands to transfer files and restart services'
+            '''
+        }
+    }
+}
