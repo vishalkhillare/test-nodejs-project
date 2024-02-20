@@ -23,7 +23,12 @@ pipeline {
             }
             steps {
                 echo 'Deploying the Node.js application to development environment...'
-                // Add deployment steps for development environment here
+                withCredentials([sshUserPrivateKey(credentialsId: 'abf3232c-91aa-4818-9714-0b694531a4c6', keyFileVariable: 'KEYFILE')]) {
+                    // Use the SSH private key to authenticate and transfer files
+                    sh '''
+                        ssh -i $KEYFILE user@172.31.18.184 'cd /path/to/your/app && git pull origin development && npm install && pm2 restart app.js'
+                    '''
+                }
             }
         }
 
@@ -33,7 +38,12 @@ pipeline {
             }
             steps {
                 echo 'Deploying the Node.js application to production environment...'
-                // Add deployment steps for production environment here
+                withCredentials([sshUserPrivateKey(credentialsId: 'abf3232c-91aa-4818-9714-0b694531a4c6d', keyFileVariable: 'KEYFILE')]) {
+                    // Use the SSH private key to authenticate and transfer files
+                    sh '''
+                        ssh -i $KEYFILE user@172.31.18.184 'cd /path/to/your/app && git pull origin main && npm install && pm2 restart app.js'
+                    '''
+                }
             }
         }
     }
@@ -44,35 +54,6 @@ pipeline {
         }
         failure {
             echo 'Pipeline failed!'
-        }
-    }
-}
-stage('Deploy to Development') {
-    when {
-        branch 'dev-test-nodejs'
-    }
-    steps {
-        echo 'Deploying the Node.js application to development environment...'
-        withCredentials([sshUserPrivateKey(credentialsId: 'abf3232c-91aa-4818-9714-0b694531a4c6', keyFileVariable: 'KEYFILE')]) {
-            // Use the SSH private key to authenticate and transfer files
-            sh '''
-                ssh -i $KEYFILE user@development-server 'commands to transfer files and restart services'
-            '''
-        }
-    }
-}
-
-stage('Deploy to Production') {
-    when {
-        branch 'prod-test-nodejs'
-    }
-    steps {
-        echo 'Deploying the Node.js application to production environment...'
-        withCredentials([sshUserPrivateKey(credentialsId: 'abf3232c-91aa-4818-9714-0b694531a4c6d', keyFileVariable: 'KEYFILE')]) {
-            // Use the SSH private key to authenticate and transfer files
-            sh '''
-                ssh -i $KEYFILE user@production-server 'commands to transfer files and restart services'
-            '''
         }
     }
 }
