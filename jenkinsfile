@@ -9,22 +9,6 @@ pipeline {
     }
 
     stages {
-        stage('Check Node.js and npm Versions') {
-            steps {
-                echo 'Checking Node.js and npm versions...'
-                sh 'node -v'
-                sh 'npm -v'
-            }
-        }
-
-        stage('Install Node.js and npm') {
-            steps {
-                echo 'Installing Node.js and npm...'
-                // Customize installation commands based on your agent machine's OS
-                sh 'sudo apt-get update && sudo apt-get install -y nodejs npm'
-            }
-        }
-
         stage('Build') {
             steps {
                 echo 'Building the app.js application...'
