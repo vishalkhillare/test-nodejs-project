@@ -17,7 +17,7 @@ pipeline {
             }
         }
 
-      stage('Deploy to Development') {
+     stage('Deploy to Development') {
     when {
         branch 'dev-test-nodejs'
     }
@@ -26,11 +26,12 @@ pipeline {
         withCredentials([sshUserPrivateKey(credentialsId: 'b5486a2e-0e3d-4f64-b7ac-df9d8e27a7d8', keyFileVariable: 'KEYFILE')]) {
             // Use the SSH private key to authenticate and transfer files
             bat '''
-                ssh -i $KEYFILE ubuntu@172-31-41-149 'cd /home/ubuntu/my-nodejs-app && git pull origin development && npm install && pm2 restart app.js'
+                ssh -i $KEYFILE ubuntu@172.31.41.149 'cd /home/ubuntu/my-nodejs-app && git pull origin development && npm install && pm2 restart app.js'
             '''
         }
     }
 }
+
 
         stage('Deploy to Production') {
             when {
