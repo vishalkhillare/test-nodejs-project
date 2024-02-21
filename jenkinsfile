@@ -1,7 +1,30 @@
 pipeline {
     agent any
 
+    environment {
+        SSH_KEY = credentials('b5486a2e-0e3d-4f64-b7ac-df9d8e27a7d8') // Replace with your actual SSH key ID
+        REMOTE_USER = 'ubuntu' // Replace with your actual SSH username for the AWS EC2 instance
+        REMOTE_HOST = '13.232.8.164' // Replace with your actual AWS EC2 public IP
+        REMOTE_DIR = '/home/ubuntu/your-application-directory' // Replace with the actual path on your AWS EC2 instance
+    }
+
     stages {
+        stage('Check Node.js and npm Versions') {
+            steps {
+                echo 'Checking Node.js and npm versions...'
+                sh 'node -v'
+                sh 'npm -v'
+            }
+        }
+
+        stage('Install Node.js and npm') {
+            steps {
+                echo 'Installing Node.js and npm...'
+                // Customize installation commands based on your agent machine's OS
+                sh 'sudo apt-get update && sudo apt-get install -y nodejs npm'
+            }
+        }
+
         stage('Build') {
             steps {
                 echo 'Building the app.js application...'
@@ -23,11 +46,11 @@ pipeline {
             }
             steps {
                 echo 'Deploying the Node.js application to development environment...'
-                withCredentials([sshUserPrivateKey(credentialsId: 'b5486a2e-0e3d-4f64-b7ac-df9d8e27a7d8', keyFileVariable: 'KEYFILE')]) {
-                    // Use the SSH private key to authenticate and transfer files
-                    sh '''
-                        ssh -i $KEYFILE user@13.232.8.164 'cd /home/ubuntu/my-nodejs-app && git pull origin development && npm install && pm2 restart app.js'
-                    '''
+                script {
+                    withCredentials([sshUserPrivateKey(credentialsId: SSH_KEY, keyFileVariable: 'SSH_KEY_FILE')]) {
+                        echo "Executing SCP command..."
+                        sh "scp -i ${SSH_KEY_FILE} -r . ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
+                    }
                 }
             }
         }
@@ -38,11 +61,11 @@ pipeline {
             }
             steps {
                 echo 'Deploying the Node.js application to production environment...'
-                withCredentials([sshUserPrivateKey(credentialsId: 'b5486a2e-0e3d-4f64-b7ac-df9d8e27a7d8', keyFileVariable: 'KEYFILE')]) {
-                    // Use the SSH private key to authenticate and transfer files
-                    sh '''
-                        ssh -i $KEYFILE user@13.232.8.164 'cd /home/ubuntu/my-nodejs-app && git pull origin main && npm install && pm2 restart app.js'
-                    '''
+                script {
+                    withCredentials([sshUserPrivateKey(credentialsId: SSH_KEY, keyFileVariable: 'SSH_KEY_FILE')]) {
+                        echo "Executing SCP command..."
+                        sh "scp -i ${SSH_KEY_FILE} -r . ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
+                    }
                 }
             }
         }
