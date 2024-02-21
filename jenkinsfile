@@ -9,6 +9,15 @@ pipeline {
     }
 
     stages {
+        stage('Debug Information') {
+            steps {
+                echo "SSH_KEY: ${SSH_KEY}"
+                echo "REMOTE_USER: ${REMOTE_USER}"
+                echo "REMOTE_HOST: ${REMOTE_HOST}"
+                echo "REMOTE_DIR: ${REMOTE_DIR}"
+            }
+        }
+
         stage('Build') {
             steps {
                 echo 'Building the app.js application...'
@@ -32,6 +41,7 @@ pipeline {
                 echo 'Deploying the Node.js application to development environment...'
                 script {
                     withCredentials([sshUserPrivateKey(credentialsId: SSH_KEY, keyFileVariable: 'SSH_KEY_FILE')]) {
+                        echo "Executing SCP command..."
                         bat "scp -i ${SSH_KEY_FILE} -r . ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
                     }
                 }
@@ -46,6 +56,7 @@ pipeline {
                 echo 'Deploying the Node.js application to production environment...'
                 script {
                     withCredentials([sshUserPrivateKey(credentialsId: SSH_KEY, keyFileVariable: 'SSH_KEY_FILE')]) {
+                        echo "Executing SCP command..."
                         bat "scp -i ${SSH_KEY_FILE} -r . ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
                     }
                 }
