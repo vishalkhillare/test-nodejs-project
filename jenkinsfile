@@ -1,13 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        SSH_KEY = credentials('b5486a2e-0e3d-4f64-b7ac-df9d8e27a7d8') // Replace with your actual SSH key ID
-        REMOTE_USER = 'ubuntu' // Replace with your actual SSH username for the AWS EC2 instance
-        REMOTE_HOST = '13.232.8.164' // Replace with your actual AWS EC2 public IP
-        REMOTE_DIR = '/home/ubuntu/your-application-directory' // Replace with the actual path on your AWS EC2 instance
-    }
-
     stages {
         stage('Build') {
             steps {
@@ -30,11 +23,11 @@ pipeline {
             }
             steps {
                 echo 'Deploying the Node.js application to development environment...'
-                script {
-                    withCredentials([sshUserPrivateKey(credentialsId: SSH_KEY, keyFileVariable: 'SSH_KEY_FILE')]) {
-                        echo "Executing SCP command..."
-                        sh "scp -i ${SSH_KEY_FILE} -r . ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
-                    }
+                withCredentials([sshUserPrivateKey(credentialsId: 'abf3232c-91aa-4818-9714-0b694531a4c6', keyFileVariable: 'KEYFILE')]) {
+                    // Use the SSH private key to authenticate and transfer files
+                    sh '''
+                        ssh -i $KEYFILE ubuntu@172-31-41-149 'cd /home/ubuntu/my-nodejs-app && git pull origin development && npm install && pm2 restart app.js'
+                    '''
                 }
             }
         }
@@ -45,11 +38,11 @@ pipeline {
             }
             steps {
                 echo 'Deploying the Node.js application to production environment...'
-                script {
-                    withCredentials([sshUserPrivateKey(credentialsId: SSH_KEY, keyFileVariable: 'SSH_KEY_FILE')]) {
-                        echo "Executing SCP command..."
-                        sh "scp -i ${SSH_KEY_FILE} -r . ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
-                    }
+                withCredentials([sshUserPrivateKey(credentialsId: 'abf3232c-91aa-4818-9714-0b694531a4c6', keyFileVariable: 'KEYFILE')]) {
+                    // Use the SSH private key to authenticate and transfer files
+                    sh '''
+                        ssh -i $KEYFILE ubuntu@172-31-41-149 'cd /home/ubuntu/my-nodejs-app && git pull origin main && npm install && pm2 restart app.js'
+                    '''
                 }
             }
         }
