@@ -25,7 +25,7 @@ pipeline {
         echo 'Deploying the Node.js application to development environment...'
         withCredentials([sshUserPrivateKey(credentialsId: 'b5486a2e-0e3d-4f64-b7ac-df9d8e27a7d8', keyFileVariable: 'KEYFILE')]) {
             // Use the SSH private key to authenticate and transfer files
-            sh '''
+            bat '''
                 ssh -i $KEYFILE ubuntu@172-31-41-149 'cd /home/ubuntu/my-nodejs-app && git pull origin development && npm install && pm2 restart app.js'
             '''
         }
@@ -40,7 +40,7 @@ pipeline {
                 echo 'Deploying the Node.js application to production environment...'
                 withCredentials([sshUserPrivateKey(credentialsId: 'abf3232c-91aa-4818-9714-0b694531a4c6', keyFileVariable: 'KEYFILE')]) {
                     // Use the SSH private key to authenticate and transfer files
-                    sh '''
+                    bat '''
                         set -x  # Enable debug output
                         ssh -i $KEYFILE ubuntu@172.31.41.149 'cd /home/ubuntu/my-nodejs-app && git pull origin main && npm install && pm2 restart app.js'
                     '''
