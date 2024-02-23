@@ -25,9 +25,9 @@ pipeline {
                 echo 'Deploying the Node.js application to development environment...'
                 withCredentials([sshUserPrivateKey(credentialsId: 'new-ssh-credential', keyFileVariable: 'KEYFILE')]) {
                     // Use the SSH private key to authenticate and transfer files
-                    bat '''
+                    sh """
                         ssh -i $KEYFILE ubuntu@13.235.33.167 'cd /home/ubuntu/my-nodejs-app && git pull origin development && npm install && pm2 restart app.js'
-                    '''
+                    """
                 }
             }
         }
