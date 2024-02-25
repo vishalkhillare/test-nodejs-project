@@ -20,7 +20,7 @@ pipeline {
         stage('Build and Deploy') {
             steps {
                 script {
-                    sh 'cd D:\myapp && npm install'
+                    sh 'cd D:\\myapp && npm install'
                     sh "rsync -r --delete --exclude='.git' your-nodejs-app/ ${UBUNTU_SERVER}:${DEPLOYMENT_PATH}"
                     sh "ssh ${UBUNTU_SERVER} 'cd ${DEPLOYMENT_PATH} && git pull origin ${GIT_BRANCH}'"
                     sh "ssh ${UBUNTU_SERVER} 'cd ${DEPLOYMENT_PATH} && npm install'"
