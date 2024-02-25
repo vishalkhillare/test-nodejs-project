@@ -7,7 +7,7 @@ pipeline {
             steps {
                 echo 'Building the app.js application...' // Echoes a message to the Jenkins console
                 // Runs npm install to install dependencies of the Node.js application
-                bat label: 'npm install', script: '"D:\\myapp" install'
+                bat label: 'npm install', script: '"C:\\Program Files\\nodejs\\npm" install'
             }
         }
 
