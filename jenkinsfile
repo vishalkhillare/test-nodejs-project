@@ -1,32 +1,40 @@
 pipeline {
-    agent any
-    
-    environment {
-        NODEJS_HOME = tool 'NodeJS_11'
-        GIT_BRANCH = 'dev-test-nodejs'
-        UBUNTU_SERVER = 'ubuntu@3.111.52.247'
-        DEPLOYMENT_PATH = '/home/ubuntu'
-    }
+    agent any // Specifies that Jenkins can run this pipeline on any available agent (node)
 
     stages {
-        stage('Checkout') {
+        // Stage for building the Node.js application
+        stage('Build') {
             steps {
-                script {
-                    git branch: "${GIT_BRANCH}", url: 'https://github.com/vishalkhillare/test-nodejs-project.git'
-                }
+                echo 'Building the app.js application...' // Echoes a message to the Jenkins console
+                // Runs npm install to install dependencies of the Node.js application
+                bat label: 'npm install', script: '"D:\\myapp" install'
             }
         }
 
-        stage('Build and Deploy') {
+        // Stage for deploying to development environment
+        stage('Deploy to Development') {
+            // Specifies when to execute this stage (based on branch name)
+            when {
+                branch 'dev-test-nodejs'
+            }
             steps {
-                script {
-                    sh 'cd D:\\myapp && npm install'
-                    sh "rsync -r --delete --exclude='.git' your-nodejs-app/ ${UBUNTU_SERVER}:${DEPLOYMENT_PATH}"
-                    sh "ssh ${UBUNTU_SERVER} 'cd ${DEPLOYMENT_PATH} && git pull origin ${GIT_BRANCH}'"
-                    sh "ssh ${UBUNTU_SERVER} 'cd ${DEPLOYMENT_PATH} && npm install'"
-                    sh "ssh ${UBUNTU_SERVER} 'cd ${DEPLOYMENT_PATH} && npm start'"
+                echo 'Deploying the Node.js application to development environment...' // Echoes a message to the Jenkins console
+                // Runs SSH commands to deploy the Node.js application to a development server
+                withCredentials([sshUserPrivateKey(credentialsId: 'new-ssh-credential', keyFileVariable: 'KEYFILE')]) {
+                    bat """
+                        ssh -i "${KEYFILE}" ubuntu@3.111.52.247 'cd /home/ubuntu/my-nodejs-app && git pull origin dev-test-nodejs && npm install && pm2 restart app.js'
+                    """
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline succeeded!' // Echoes a message to the Jenkins console
+        }
+        failure {
+            echo 'Pipeline failed!' // Echoes a message to the Jenkins console
         }
     }
 }
