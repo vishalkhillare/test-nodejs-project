@@ -20,7 +20,7 @@ pipeline {
             steps {
                 echo 'Deploying the Node.js application to development environment...' // Echoes a message to the Jenkins console
                 // Runs SSH commands to deploy the Node.js application to a development server
-                withCredentials([sshUserPrivateKey(credentialsId: 'deploy-to-development', keyFileVariable: 'KEYFILE')]) {
+                withCredentials([sshUserPrivateKey(credentialsId: 'deploy-to-devlopment', keyFileVariable: 'KEYFILE')]) {
                     bat """
                         ssh -i "${KEYFILE}" ubuntu@13.201.15.147 'cd /home/ubuntu/my-nodejs-app && git pull origin dev-test-nodejs && npm install && pm2 restart app.js'
                     """
