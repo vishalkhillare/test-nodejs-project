@@ -1,25 +1,20 @@
 pipeline {
-    agent any // Specifies that Jenkins can run this pipeline on any available agent (node)
+    agent any 
 
     stages {
-        // Stage for building the Node.js application
         stage('Build') {
             steps {
-                echo 'Building the app.js application...' // Echoes a message to the Jenkins console
-                // Runs npm install to install dependencies of the Node.js application
+                echo 'Building the app.js application...' 
                 bat label: 'npm install', script: '"C:\\Program Files\\nodejs\\npm" install'
             }
         }
 
-        // Stage for deploying to development environment
         stage('Deploy to Development') {
-            // Specifies when to execute this stage (based on branch name)
             when {
                 branch 'dev-test-nodejs'
             }
             steps {
-                echo 'Deploying the Node.js application to development environment...' // Echoes a message to the Jenkins console
-                // Runs SSH commands to deploy the Node.js application to a development server
+                echo 'Deploying the Node.js application to development environment...' 
                 withCredentials([sshUserPrivateKey(credentialsId: 'deploy-to-devlopment', keyFileVariable: 'KEYFILE')]) {
                     bat """
                         ssh -i "${KEYFILE}" ubuntu@3.109.153.26 'cd /home/ubuntu/my-nodejs-app && git pull origin dev-test-nodejs && npm install && pm2 restart app.js'
@@ -31,10 +26,10 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline succeeded!' // Echoes a message to the Jenkins console
+            echo 'Pipeline succeeded!' 
         }
         failure {
-            echo 'Pipeline failed!' // Echoes a message to the Jenkins console
+            echo 'Pipeline failed!' 
         }
     }
 }
