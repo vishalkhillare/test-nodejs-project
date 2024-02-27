@@ -5,7 +5,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the app.js application...' 
-                bat label: 'npm install', script: '"C:\\Program Files\\nodejs\\npm" install'
+                bat label: 'npm install', script: '"C:/Program Files/nodejs/npm" install'
             }
         }
 
@@ -16,9 +16,9 @@ pipeline {
             steps {
                 echo 'Deploying the Node.js application to development environment...' 
                 withCredentials([sshUserPrivateKey(credentialsId: 'deploy-to-devlopment', keyFileVariable: 'KEYFILE')]) {
-                    bat """
-                        ssh -i "${KEYFILE}" ubuntu@3.109.153.26 'cd /home/ubuntu/my-nodejs-app && git pull origin dev-test-nodejs && npm install && pm2 restart app.js'
-                    """
+                    bat script: """
+ssh -i "C:/Users/tests/.ssh/key.pem" ubuntu@3.109.153.26 'cd /home/ubuntu/my-nodejs-app && git pull origin dev-test-nodejs && npm install && pm2 restart app.js'
+                    """, label: 'SSH Deployment'
                 }
             }
         }
