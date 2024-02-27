@@ -1,36 +1,21 @@
-pipeline {
-    agent any 
-
-    stages {
-        stage('Build') {
-            steps {
-                echo 'Building the app.js application...' 
-                bat label: 'npm install', script: '"C:/Program Files/nodejs/npm" install'
-            }
-        }
-
-        stage('Deploy to Development') {
-            when {
-                branch 'dev-test-nodejs'
-            }
-            steps {
-                echo 'Deploying the Node.js application to development environment...' 
-                withCredentials([sshUserPrivateKey(credentialsId: 'deploy-to-devlopment', keyFileVariable: 'KEYFILE')]) {
-                    bat script: """
-ssh ubuntu@3.109.153.26 'cd /home/ubuntu/my-nodejs-app && git pull origin dev-test-nodejs && npm install && pm2 restart app.js'
-
-                    """, label: 'SSH Deployment'
-                }
-            }
-        }
+stage('deploy-dev') {
+    when {
+        expression { env.BRANCH_NAME == 'deploy' }
     }
-
-    post {
-        success {
-            echo 'Pipeline succeeded!' 
-        }
-        failure {
-            echo 'Pipeline failed!' 
+    environment {
+        DEPLOYMENT_SERVER_IP = credentials("deploy-to-development")
+        DEPLOYMENT_PATH = '/home/ubuntu/my-nodejs-app'  // Adjusted deployment path
+    }
+    steps {
+        withCredentials([
+            sshUserPrivateKey(credentialsId: "deploy-to-development", keyFileVariable: 'sshKey')
+        ]) {
+            echo 'Deploying the application'
+            sh '''#!/bin/bash
+                ssh-keyscan $DEPLOYMENT_SERVER_IP >> ~/.ssh/known_hosts
+                rsync -avz --delete -e "ssh -i $sshKey" ./ deployer@$DEPLOYMENT_SERVER_IP:$DEPLOYMENT_PATH
+                ssh -i $sshKey deployer@$DEPLOYMENT_SERVER_IP "cd $DEPLOYMENT_PATH && npm install && npm start"
+            '''
         }
     }
 }
