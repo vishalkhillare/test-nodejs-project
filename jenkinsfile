@@ -1,22 +1,19 @@
 stage('deploy-dev') {
-    steps {
-        script {
-            if (env.BRANCH_NAME == 'deploy') {
-                // Set deployment environment variables
-                DEPLOYMENT_SERVER_IP = credentials("deploy-to-development")
-                DEPLOYMENT_PATH = '/home/ubuntu/my-nodejs-app'  // Adjusted deployment path
-
-                // Deploy the application
-                withCredentials([
-                    sshUserPrivateKey(credentialsId: "deploy-to-development", keyFileVariable: 'sshKey')
-                ]) {
-                    echo 'Deploying the application'
-                    sh '''#!/bin/bash
-                        ssh-keyscan $DEPLOYMENT_SERVER_IP >> ~/.ssh/known_hosts
-                        rsync -avz --delete -e "ssh -i $sshKey" ./ deployer@$DEPLOYMENT_SERVER_IP:$DEPLOYMENT_PATH
-                        ssh -i $sshKey deployer@$DEPLOYMENT_SERVER_IP "cd $DEPLOYMENT_PATH && npm install && npm start"
-                    '''
-                }
+    if (env.BRANCH_NAME == 'deploy') {
+        environment {
+            DEPLOYMENT_SERVER_IP = credentials("deploy-to-development")
+            DEPLOYMENT_PATH = '/home/ubuntu/my-nodejs-app'  // Adjusted deployment path
+        }
+        steps {
+            withCredentials([
+                sshUserPrivateKey(credentialsId: "deploy-to-development", keyFileVariable: 'sshKey')
+            ]) {
+                echo 'Deploying the application'
+                sh '''#!/bin/bash
+                    ssh-keyscan $DEPLOYMENT_SERVER_IP >> ~/.ssh/known_hosts
+                    rsync -avz --delete -e "ssh -i $sshKey" ./ deployer@$DEPLOYMENT_SERVER_IP:$DEPLOYMENT_PATH
+                    ssh -i $sshKey deployer@$DEPLOYMENT_SERVER_IP "cd $DEPLOYMENT_PATH && npm install && npm start"
+                '''
             }
         }
     }
