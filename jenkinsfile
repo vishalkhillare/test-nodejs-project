@@ -22,7 +22,7 @@ pipeline {
                 // Runs SSH commands to deploy the Node.js application to a development server
                 withCredentials([sshUserPrivateKey(credentialsId: 'deploy-to-devlopment', keyFileVariable: 'KEYFILE')]) {
                     bat """
-                        ssh -i "${KEYFILE}" ubuntu@13.201.15.147 'cd /home/ubuntu/my-nodejs-app && git pull origin dev-test-nodejs && npm install && pm2 restart app.js'
+                        ssh -i "${KEYFILE}" ubuntu@3.109.153.26 'cd /home/ubuntu/my-nodejs-app && git pull origin dev-test-nodejs && npm install && pm2 restart app.js'
                     """
                 }
             }
