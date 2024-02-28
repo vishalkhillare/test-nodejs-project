@@ -1,16 +1,17 @@
 pipeline {
     agent any
 
-    options {
-        skipStagesAfterUnstable()
-        disableRestartFromStage()
-    }
-
     stages {
         stage('Git Checkout') {
+            when {
+                anyOf {
+                    expression { env.BRANCH_NAME == 'dev-test-nodejs' }
+                    expression { env.BRANCH_NAME == 'prod-test-nodejs' }
+                }
+            }
             steps {
                 echo 'Checking out code from Git...'
-                git branch: 'main', url: 'https://your-git-repo-url.git'
+                git branch: env.BRANCH_NAME, url: 'https://github.com/vishalkhillare/test-nodejs-project.git'
             }
         }
 
@@ -26,13 +27,13 @@ pipeline {
             }
         }
 
-        stage('deploy-dev') {
+        stage('create-env-dev') {
             when {
-                expression { env.BRANCH_NAME == 'dev-test-nodejs' }
+                branch 'dev-test-nodejs'
             }
             environment {
-                DEPLOYMENT_SERVER_IP = '15.207.99.187'
-                DEPLOYMENT_PATH = '/home/ubuntu/my-nodejs-app'  // Adjusted deployment path
+                DEPLOYMENT_SERVER_IP = '15.207.99.187'  // Replace with your development server IP
+                DEPLOYMENT_PATH = '/home/ubuntu/my-nodejs-app'
             }
             steps {
                 withCredentials([
