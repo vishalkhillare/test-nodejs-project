@@ -52,8 +52,8 @@ pipeline {
                         } else {
                             bat '''
                                 type nul > known_hosts
-                                mkdir -p %userprofile%/.ssh
-                                ssh-keyscan ${DEPLOYMENT_SERVER_IP} >> %userprofile%/.ssh/known_hosts
+                                mkdir -p %userprofile%\\.ssh
+                                ssh-keyscan ${DEPLOYMENT_SERVER_IP} >> %userprofile%\\.ssh\\known_hosts
                                 scp -r -i $SSH_KEY ./ deployer@$DEPLOYMENT_SERVER_IP:$DEPLOYMENT_PATH
                                 ssh -i $SSH_KEY deployer@$DEPLOYMENT_SERVER_IP "cd $DEPLOYMENT_PATH && npm install && start npm start"
                             '''
