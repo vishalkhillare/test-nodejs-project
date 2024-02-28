@@ -41,11 +41,22 @@ pipeline {
                     sshUserPrivateKey(credentialsId: "deploy-to-devlopment", keyFileVariable: 'sshKey')
                 ]) {
                     echo 'Deploying the application'
-                    sh '''#!/bin/bash
-                        ssh-keyscan $DEPLOYMENT_SERVER_IP >> ~/.ssh/known_hosts
-                        rsync -avz --delete -e "ssh -i $sshKey" ./ deployer@$DEPLOYMENT_SERVER_IP:$DEPLOYMENT_PATH
-                        ssh -i $sshKey deployer@$DEPLOYMENT_SERVER_IP "cd $DEPLOYMENT_PATH && npm install && npm start"
-                    '''
+                    script {
+                        if (isUnix()) {
+                            sh '''#!/bin/bash
+                                ssh-keyscan $DEPLOYMENT_SERVER_IP >> ~/.ssh/known_hosts
+                                rsync -avz --delete -e "ssh -i $sshKey" ./ deployer@$DEPLOYMENT_SERVER_IP:$DEPLOYMENT_PATH
+                                ssh -i $sshKey deployer@$DEPLOYMENT_SERVER_IP "cd $DEPLOYMENT_PATH && npm install && npm start &"
+                            '''
+                        } else {
+                            bat '''
+                                type nul > known_hosts
+                                ssh-keyscan $DEPLOYMENT_SERVER_IP >> known_hosts
+                                scp -r -i $sshKey ./ deployer@$DEPLOYMENT_SERVER_IP:$DEPLOYMENT_PATH
+                                ssh -i $sshKey deployer@$DEPLOYMENT_SERVER_IP "cd $DEPLOYMENT_PATH && npm install && start npm start"
+                            '''
+                        }
+                    }
                 }
             }
         }
