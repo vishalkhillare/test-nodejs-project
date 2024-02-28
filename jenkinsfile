@@ -55,6 +55,7 @@ pipeline {
                                 type nul > known_hosts
                                 :: mkdir -p %userprofile%\\.ssh
                                 ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %userprofile%\\.ssh\\known_hosts
+                                icacls %SSH_KEY% /inheritance:r /grant:r "%USERNAME%:R"
                                 scp -r -i %SSH_KEY% ./ deployer@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
                                 ssh -i %SSH_KEY% deployer@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"
                             '''
