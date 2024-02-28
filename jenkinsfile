@@ -36,19 +36,6 @@ pipeline {
                 DEPLOYMENT_PATH = '/home/ubuntu/my-nodejs-app'
             }
             steps {
-                script {
-                    echo 'Creating .env file...'
-                    // Adjust this part based on your requirements to create .env file content
-                    echo "PORT=3000" > .env
-                    echo "MONGODB_URL=mongodb://localhost:27017/mydatabase" >> .env
-                    echo "DB_NAME=mydatabase" >> .env
-                    // Add other environment variables as needed
-                }
-
-                // Use 'start' to run processes in the background on Windows
-                bat 'start npm install'
-                bat 'start npm start'
-
                 withCredentials([
                     sshUserPrivateKey(credentialsId: "deploy-to-development", keyFileVariable: 'sshKey')
                 ]) {
