@@ -37,6 +37,10 @@ pipeline {
                 DEPLOYMENT_PATH = '/home/ubuntu/my-nodejs-app'
             }
             steps {
+                script {
+                    // Create the .ssh directory if it doesn't exist
+                    sh 'mkdir -p /var/lib/jenkins/.ssh'
+                }
                 withCredentials([
                     sshUserPrivateKey(credentialsId: "deploy-to-devlopment", keyFileVariable: 'sshKey')
                 ]) {
