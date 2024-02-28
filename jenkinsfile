@@ -35,6 +35,7 @@ pipeline {
             environment {
                 DEPLOYMENT_SERVER_IP = '15.207.99.187'  // Replace with your development server IP
                 DEPLOYMENT_PATH = '/home/ubuntu/my-nodejs-app'
+                SSH_KEY="key.pem"
             }
             steps {
                 withCredentials([
@@ -54,8 +55,8 @@ pipeline {
                                 type nul > known_hosts
                                 :: mkdir -p %userprofile%\\.ssh
                                 ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %userprofile%\\.ssh\\known_hosts
-                                scp -r -i $SSH_KEY ./ deployer@$DEPLOYMENT_SERVER_IP:$DEPLOYMENT_PATH
-                                ssh -i $SSH_KEY deployer@$DEPLOYMENT_SERVER_IP "cd $DEPLOYMENT_PATH && npm install && start npm start"
+                                scp -r -i %SSH_KEY% ./ deployer@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
+                                ssh -i %SSH_KEY% deployer@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"
                             '''
                         }
                     }
