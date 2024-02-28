@@ -44,7 +44,7 @@ pipeline {
                     sh '''#!/bin/bash
                         ssh-keyscan $DEPLOYMENT_SERVER_IP >> ~/.ssh/known_hosts
                         rsync -avz --delete -e "ssh -i $sshKey" ./ deployer@$DEPLOYMENT_SERVER_IP:$DEPLOYMENT_PATH
-                        ssh -i $sshKey deployer@$DEPLOYMENT_SERVER_IP "cd $DEPLOYMENT_PATH && npm install && npm start &"
+                        ssh -i $sshKey deployer@$DEPLOYMENT_SERVER_IP "cd $DEPLOYMENT_PATH && npm install && npm start"
                     '''
                 }
             }
