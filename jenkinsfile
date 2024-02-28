@@ -2,38 +2,66 @@ pipeline {
     agent any
 
     stages {
-        stage('Build') {
+        stage('Git Checkout') {
+            when {
+                anyOf {
+                    expression { env.BRANCH_NAME == 'dev-test-nodejs' }
+                    expression { env.BRANCH_NAME == 'prod-test-nodejs' }
+                }
+            }
             steps {
-                echo 'Building the app.js application...'
-                bat label: 'npm install', script: '"C:\\Program Files\\nodejs\\npm" install'
+                echo 'Checking out code from Git...'
+                git branch: env.BRANCH_NAME, url: 'https://github.com/vishalkhillare/test-nodejs-project.git'
             }
         }
 
-        stage('Test') {
+        stage('install') {
+            when {
+                anyOf {
+                    expression { env.BRANCH_NAME == 'dev-test-nodejs' }
+                    expression { env.BRANCH_NAME == 'prod-test-nodejs' }
+                }
+            }
             steps {
-                echo 'Running tests...'
-                bat label: 'npm test', script: '"C:\\Program Files\\nodejs\\npm" test'
-                echo "Tests completed successfully"
+                // For both Unix and Windows
+                bat 'npm install'
             }
         }
 
-        stage('Deploy to Development') {
+        stage('create-env-dev') {
             when {
                 branch 'dev-test-nodejs'
             }
-            steps {
-                echo 'Deploying the Node.js application to development environment...'
-                // Add deployment steps for development environment here
-            }
-        }
-
-        stage('Deploy to Production') {
-            when {
-                branch 'prod-test-nodejs'
+            environment {
+                DEPLOYMENT_SERVER_IP = '15.207.99.187'  // Replace with your development server IP
+                DEPLOYMENT_PATH = '/home/ubuntu/my-nodejs-app'
             }
             steps {
-                echo 'Deploying the Node.js application to production environment...'
-                // Add deployment steps for production environment here
+                script {
+                    // Create the .ssh directory if it doesn't exist
+                    sh 'mkdir -p /var/lib/jenkins/.ssh'
+                }
+                withCredentials([
+                    sshUserPrivateKey(credentialsId: "deploy-to-devlopment", keyFileVariable: 'sshKey')
+                ]) {
+                    echo 'Deploying the application'
+                    script {
+                        if (isUnix()) {
+                            sh '''#!/bin/bash
+                                ssh-keyscan $DEPLOYMENT_SERVER_IP >> ~/.ssh/known_hosts
+                                rsync -avz --delete -e "ssh -i $sshKey" ./ deployer@$DEPLOYMENT_SERVER_IP:$DEPLOYMENT_PATH
+                                ssh -i $sshKey deployer@$DEPLOYMENT_SERVER_IP "cd $DEPLOYMENT_PATH && npm install && npm start &"
+                            '''
+                        } else {
+                            bat '''
+                                type nul > known_hosts
+                                ssh-keyscan $DEPLOYMENT_SERVER_IP >> known_hosts
+                                scp -r -i $sshKey ./ deployer@$DEPLOYMENT_SERVER_IP:$DEPLOYMENT_PATH
+                                ssh -i $sshKey deployer@$DEPLOYMENT_SERVER_IP "cd $DEPLOYMENT_PATH && npm install && start npm start"
+                            '''
+                        }
+                    }
+                }
             }
         }
     }
