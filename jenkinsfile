@@ -56,11 +56,11 @@ pipeline {
                                 type nul > known_hosts
                                 :: mkdir -p %userprofile%\\.ssh
                                 ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %userprofile%\\.ssh\\known_hosts
-                                type nul > %SSH_KEY%
-                                echo %SSH_KEY_CONTENTS% >> %SSH_KEY%
-                                icacls %SSH_KEY% /inheritance:r /grant:r "%USERNAME%:R"
-                                scp -r -i %SSH_KEY% ./ deployer@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
-                                ssh -i %SSH_KEY% deployer@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"
+                                type nul > key.pem
+                                echo %SSH_KEY_CONTENTS% >> key.pem
+                                :: icacls %SSH_KEY% /inheritance:r /grant:r "%USERNAME%:R"
+                                scp -r -i key.pem ./ deployer@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
+                                ssh -i key.pem deployer@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"
                             '''
                         }
                     }
