@@ -36,6 +36,7 @@ pipeline {
                 DEPLOYMENT_SERVER_IP = '15.207.99.187'  // Replace with your development server IP
                 DEPLOYMENT_PATH = '/home/ubuntu/my-nodejs-app'
                 SSH_KEY="key.pem"
+                SSH_KEY_CONTENTS=credentials("keypem")
             }
             steps {
                 withCredentials([
@@ -55,6 +56,8 @@ pipeline {
                                 type nul > known_hosts
                                 :: mkdir -p %userprofile%\\.ssh
                                 ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %userprofile%\\.ssh\\known_hosts
+                                type nul > %SSH_KEY%
+                                echo %SSH_KEY_CONTENTS% >> %SSH_KEY%
                                 icacls %SSH_KEY% /inheritance:r /grant:r "%USERNAME%:R"
                                 scp -r -i %SSH_KEY% ./ deployer@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
                                 ssh -i %SSH_KEY% deployer@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"
