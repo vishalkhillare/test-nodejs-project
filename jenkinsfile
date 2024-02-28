@@ -3,64 +3,56 @@ pipeline {
 
     stages {
         stage('Git Checkout') {
+            when {
+                anyOf {
+                    expression { env.BRANCH_NAME == 'dev-test-nodejs' }
+                    expression { env.BRANCH_NAME == 'prod-test-nodejs' }
+                }
+            }
             steps {
                 echo 'Checking out code from Git...'
-                git branch: 'main', url: 'https://your-git-repo-url.git'
+                git branch: env.BRANCH_NAME, url: 'https://github.com/vishalkhillare/test-nodejs-project.git'
             }
         }
 
-        stage('Build') {
-            steps {
-                echo 'Building the Node.js application...'
-                bat label: 'npm install', script: 'npm install'
-            }
-        }
-
-        stage('Create .env') {
-            steps {
-                echo 'Creating .env file...'
-                script {
-                    // Adjust this part based on your requirements to create .env file content
-                    echo "PORT=3000" > .env
-                    echo "MONGODB_URL=mongodb://localhost:27017/mydatabase" >> .env
-                    echo "DB_NAME=mydatabase" >> .env
-                    // Add other environment variables as needed
+        stage('install') {
+            when {
+                anyOf {
+                    expression { env.BRANCH_NAME == 'dev-test-nodejs' }
+                    expression { env.BRANCH_NAME == 'prod-test-nodejs' }
                 }
             }
-        }
-
-        stage('Deploy to Development') {
-            when {
-                branch 'develop' // Adjust the branch name as needed
-            }
             steps {
-                echo 'Deploying the Node.js application to development environment...'
-                script {
-                    withCredentials([sshUserPrivateKey(credentialsId: 'your-ssh-credentials-id', keyFileVariable: 'SSH_KEY')]) {
-                        sh '''
-                            ssh-keyscan $DEPLOYMENT_SERVER_IP >> ~/.ssh/known_hosts
-                            rsync -avz --delete -e "ssh -i $SSH_KEY" ./ deployer@$DEPLOYMENT_SERVER_IP:$DEPLOYMENT_PATH
-                            ssh -i $SSH_KEY deployer@$DEPLOYMENT_SERVER_IP "cd $DEPLOYMENT_PATH && npm install && pm2 restart your-app"
-                        '''
-                    }
-                }
+                // For both Unix and Windows
+                bat 'npm install'
             }
         }
 
-        stage('Deploy to Production') {
+        stage('create-env-dev') {
             when {
-                branch 'main' // Adjust the branch name as needed
+                branch 'dev-test-nodejs'
+            }
+            environment {
+                DEPLOYMENT_SERVER_IP = '15.207.99.187'  // Replace with your development server IP
+                DEPLOYMENT_PATH = '/home/ubuntu/my-nodejs-app'
             }
             steps {
-                echo 'Deploying the Node.js application to production environment...'
-                script {
-                    withCredentials([sshUserPrivateKey(credentialsId: 'your-ssh-credentials-id', keyFileVariable: 'SSH_KEY')]) {
-                        sh '''
-                            ssh-keyscan $PRODUCTION_SERVER_IP >> ~/.ssh/known_hosts
-                            rsync -avz --delete -e "ssh -i $SSH_KEY" ./ deployer@$PRODUCTION_SERVER_IP:$PRODUCTION_PATH
-                            ssh -i $SSH_KEY deployer@$PRODUCTION_SERVER_IP "cd $PRODUCTION_PATH && npm install && pm2 restart your-app"
-                        '''
-                    }
+                withCredentials([
+                    sshUserPrivateKey(credentialsId: "deploy-to-devlopment", keyFileVariable: 'sshKey')
+                ]) {
+                    echo 'Deploying the application'
+                    sh '''
+                        #!/bin/bash
+                        echo "Setting up known_hosts..."
+                        type nul  1>known_hosts
+                        ssh-keyscan $DEPLOYMENT_SERVER_IP  1>>known_hosts
+
+                        echo "Deploying using rsync..."
+                        rsync -avz --delete -e "ssh -i $sshKey" ./ deployer@$DEPLOYMENT_SERVER_IP:$DEPLOYMENT_PATH
+
+                        echo "Running remote commands..."
+                        ssh -i $sshKey deployer@$DEPLOYMENT_SERVER_IP "cd $DEPLOYMENT_PATH && npm install && start npm start"
+                    '''
                 }
             }
         }
