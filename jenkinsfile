@@ -38,7 +38,7 @@ pipeline {
             }
             steps {
                 withCredentials([
-                    sshUserPrivateKey(credentialsId: "deploy-to-development", keyFileVariable: 'sshKey')
+                    sshUserPrivateKey(credentialsId: "deploy-to-devlopment", keyFileVariable: 'sshKey')
                 ]) {
                     echo 'Deploying the application'
                     sh '''#!/bin/bash
