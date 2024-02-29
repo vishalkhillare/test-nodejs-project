@@ -64,9 +64,6 @@ pipeline {
         failure {
             echo 'Pipeline failed!'
         }
-    }
-
-    post {
         always {
             // Adjust permissions for key.pem
             script {
