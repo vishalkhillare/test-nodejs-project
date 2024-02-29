@@ -32,7 +32,7 @@ pipeline {
                     sshUserPrivateKey(credentialsId: "deploy-to-devlopment", keyFileVariable: 'SSH_KEY')
                 ]) {
                     script {
-                        // Create key.pem file and set permissions
+                        // Create key.pem file
                         writeFile file: 'key.pem', text: SSH_KEY_CONTENTS
                         // Add deployment commands here
                         bat """
