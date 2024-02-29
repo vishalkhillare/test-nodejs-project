@@ -34,17 +34,7 @@ pipeline {
                     script {
                         // Create key.pem file and set permissions
                         writeFile file: 'key.pem', text: SSH_KEY_CONTENTS
-                        if (isUnix()) {
-                            sh """
-                                chmod 600 key.pem
-                                # Add your deployment commands here
-                            """
-                        } else {
-                            bat """
-                                REM Add your deployment commands here
-                            """
-                        }
-                        // Add your deployment commands here
+                        // Add deployment commands here
                         sh """
                             ssh-keyscan $DEPLOYMENT_SERVER_IP >> ~/.ssh/known_hosts
                             rsync -avz --delete -e 'ssh -i key.pem' ./ deployer@$DEPLOYMENT_SERVER_IP:$DEPLOYMENT_PATH
