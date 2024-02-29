@@ -60,7 +60,7 @@ pipeline {
                                 echo %SSH_KEY_CONTENTS% >> key.pem
                                 icacls key.pem /inheritance:r /grant:r "%USERNAME%:R"
                                 scp -r -i key.pem ./ deployer@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
-                                ssh -i key.pem deployer@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"
+                                ssh -i key.pem deployer@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && npm start"
                             '''
                         }
                     }
