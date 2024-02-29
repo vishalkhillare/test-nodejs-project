@@ -36,7 +36,7 @@ pipeline {
                         writeFile file: 'key.pem', text: SSH_KEY_CONTENTS
                         // Add deployment commands here
                         bat """
-                            ssh-keyscan $DEPLOYMENT_SERVER_IP >> C:\Users\tests\.ssh\known_hosts
+                            ssh-keyscan 15.207.99.187 >> C:\Users\tests\.ssh\known_hosts
                             rsync -avz --delete -e 'ssh -i key.pem' ./ deployer@$DEPLOYMENT_SERVER_IP:$DEPLOYMENT_PATH
                             ssh -i key.pem ubuntu@$DEPLOYMENT_SERVER_IP "cd $DEPLOYMENT_PATH && npm install && start /b npm start"
                         """
