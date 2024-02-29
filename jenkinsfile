@@ -35,19 +35,27 @@ pipeline {
                         // Create key.pem file and set permissions
                         writeFile file: 'key.pem', text: SSH_KEY_CONTENTS
                         if (isUnix()) {
+                            echo 'Setting permissions for key.pem on Unix...'
                             sh """
                                 chmod 600 key.pem
+                                echo 'Adding deployment server to known_hosts...'
                                 ssh-keyscan $DEPLOYMENT_SERVER_IP >> ~/.ssh/known_hosts
+                                echo 'Deploying files using rsync...'
                                 rsync -avz --delete -e 'ssh -i key.pem' ./ deployer@$DEPLOYMENT_SERVER_IP:$DEPLOYMENT_PATH
+                                echo 'Executing remote commands over SSH...'
                                 ssh -i key.pem deployer@$DEPLOYMENT_SERVER_IP "cd $DEPLOYMENT_PATH && npm install && npm start &"
                             """
                         } else {
+                            echo 'Setting permissions for key.pem on Windows...'
                             bat """
                                 type nul > key.pem
                                 echo %SSH_KEY_CONTENTS% >> key.pem
                                 icacls key.pem /inheritance:r /grant:r "%USERNAME%:F"
+                                echo 'Adding deployment server to known_hosts...'
                                 ssh-keyscan $DEPLOYMENT_SERVER_IP >> %USERPROFILE%\\.ssh\\known_hosts
+                                echo 'Copying files using SCP...'
                                 scp -r -i key.pem ./ deployer@$DEPLOYMENT_SERVER_IP:$DEPLOYMENT_PATH
+                                echo 'Executing remote commands over SSH...'
                                 ssh -i key.pem deployer@$DEPLOYMENT_SERVER_IP "cd $DEPLOYMENT_PATH && npm install && npm start"
                             """
                         }
