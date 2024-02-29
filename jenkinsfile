@@ -59,8 +59,8 @@ pipeline {
                                 type nul > key.pem
                                 echo %SSH_KEY_CONTENTS% >> key.pem
                                 icacls key.pem /inheritance:r /grant:r "%SDLCCORP\tests%:R"
-                                scp -v -r -i key.pem ./ deployer@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
-                                ssh -i key.pem deployer@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"
+                                scp -v -r -i key.pem ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
+                                ssh -i key.pem ubuntu@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"
                             '''
                         }
                     }
