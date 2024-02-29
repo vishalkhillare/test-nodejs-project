@@ -28,6 +28,18 @@ pipeline {
             }
         }
 
+        stage('Prepare') {
+            when {
+                branch 'dev-test-nodejs'
+            }
+            steps {
+                // Add the commands to set correct permissions on the key file
+                script {
+                    bat 'icacls key.pem /inheritance:r /grant:r "SDLCCORP\\tests:R"'
+                }
+            }
+        }
+
         stage('create-env-dev') {
             when {
                 branch 'dev-test-nodejs'
@@ -37,8 +49,21 @@ pipeline {
                 DEPLOYMENT_PATH = '/home/ubuntu/my-nodejs-app'
                 SSH_KEY="key.pem"
                 SSH_KEY_CONTENTS=credentials("keypem")
+                USERNAME="SDLCCORP\\tests"  // Set your actual username here
             }
             steps {
+                script {
+                    echo 'Setting correct permissions on the private key'
+                    if (isUnix()) {
+                        sh '''
+                            # Unix-specific commands (if needed)
+                        '''
+                    } else {
+                        bat '''
+                            icacls key.pem /inheritance:r /grant:r "$USERNAME:R"
+                        '''
+                    }
+                }
                 withCredentials([
                     sshUserPrivateKey(credentialsId: "deploy-to-devlopment", keyFileVariable: 'SSH_KEY')
                 ]) {
@@ -54,11 +79,9 @@ pipeline {
                         } else {
                             bat '''
                                 type nul > known_hosts
-                                :: mkdir -p %SDLCCORP\tests%\\.ssh
-                                ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %SDLCCORP\tests%\\.ssh\\known_hosts
+                                ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %USERNAME%\\.ssh\\known_hosts
                                 type nul > key.pem
                                 echo %SSH_KEY_CONTENTS% >> key.pem
-                                icacls key.pem /inheritance:r /grant:r "%SDLCCORP\tests%:R"
                                 scp -r -i key.pem ./ deployer@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
                                 ssh -i key.pem deployer@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"
                             '''
