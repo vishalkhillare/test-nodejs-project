@@ -25,7 +25,7 @@ pipeline {
                 DEPLOYMENT_SERVER_IP = '15.207.99.187'
                 DEPLOYMENT_PATH = '/home/ubuntu/my-nodejs-app'
                 SSH_KEY = "key.pem"
-                SSH_KEY_CONTENTS = credentials("keypem")
+                SSH_KEY_CONTENTS = credentials("keypem").trim() // Trim leading/trailing whitespace
             }
             steps {
                 withCredentials([
