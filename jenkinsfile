@@ -65,4 +65,17 @@ pipeline {
             echo 'Pipeline failed!'
         }
     }
+
+    post {
+        always {
+            // Adjust permissions for key.pem
+            script {
+                if (isUnix()) {
+                    sh "chmod 600 key.pem"
+                } else {
+                    bat "icacls key.pem /inheritance:r /grant:r \"%USERNAME%:F\""
+                }
+            }
+        }
+    }
 }
