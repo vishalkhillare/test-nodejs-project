@@ -37,20 +37,20 @@ pipeline {
                         if (isUnix()) {
                             sh """
                                 chmod 600 key.pem
-                                ssh-keyscan $DEPLOYMENT_SERVER_IP >> ~/.ssh/known_hosts
-                                rsync -avz --delete -e 'ssh -i key.pem' ./ deployer@$DEPLOYMENT_SERVER_IP:$DEPLOYMENT_PATH
-                                ssh -i key.pem deployer@$DEPLOYMENT_SERVER_IP "cd $DEPLOYMENT_PATH && npm install && npm start &"
+                                # Add your deployment commands here
                             """
                         } else {
                             bat """
-                                type nul > key.pem
-                                echo %SSH_KEY_CONTENTS% >> key.pem
-                                icacls key.pem /inheritance:r /grant:r "%USERNAME%:F"
-                                ssh-keyscan $DEPLOYMENT_SERVER_IP >> %USERPROFILE%\\.ssh\\known_hosts
-                                scp -r -i key.pem ./ deployer@$DEPLOYMENT_SERVER_IP:$DEPLOYMENT_PATH
-                                ssh -i key.pem deployer@$DEPLOYMENT_SERVER_IP "cd $DEPLOYMENT_PATH && npm install && npm start"
+                                icacls key.pem /inheritance:r /grant:r "SDLCCORP$:F"
+                                # Add your deployment commands here
                             """
                         }
+                        // Add your deployment commands here
+                        sh """
+                            ssh-keyscan $DEPLOYMENT_SERVER_IP >> ~/.ssh/known_hosts
+                            rsync -avz --delete -e 'ssh -i key.pem' ./ deployer@$DEPLOYMENT_SERVER_IP:$DEPLOYMENT_PATH
+                            ssh -i key.pem deployer@$DEPLOYMENT_SERVER_IP "cd $DEPLOYMENT_PATH && npm install && npm start &"
+                        """
                     }
                 }
             }
@@ -63,16 +63,6 @@ pipeline {
         }
         failure {
             echo 'Pipeline failed!'
-        }
-        always {
-            // Adjust permissions for key.pem
-            script {
-                if (isUnix()) {
-                    sh "chmod 600 key.pem"
-                } else {
-                    bat "icacls key.pem /inheritance:r /grant:r \"%USERNAME%:F\""
-                }
-            }
         }
     }
 }
