@@ -3,11 +3,21 @@ pipeline {
 
     stages {
         stage('Git Checkout') {
-            // Your Git checkout stage configuration
+            steps {
+                echo 'Checking out code from Git...'
+                script {
+                    git branch: env.BRANCH_NAME, url: 'https://github.com/vishalkhillare/test-nodejs-project.git'
+                }
+            }
         }
 
         stage('Install') {
-            // Your npm install stage configuration
+            steps {
+                echo 'Installing npm dependencies...'
+                script {
+                    bat 'npm install'
+                }
+            }
         }
 
         stage('Deploy') {
