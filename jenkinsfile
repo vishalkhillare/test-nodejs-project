@@ -40,17 +40,17 @@ pipeline {
                                 # Add your deployment commands here
                             """
                         } else {
-                            bat """
+                            bat '''
                                 icacls key.pem /inheritance:r /grant:r "SDLCCORP$:F"
-                                # Add your deployment commands here
-                            """
+                                REM Add your deployment commands here
+                            '''
                         }
                         // Add your deployment commands here
-                        sh """
+                        sh '''
                             ssh-keyscan $DEPLOYMENT_SERVER_IP >> ~/.ssh/known_hosts
                             rsync -avz --delete -e 'ssh -i key.pem' ./ deployer@$DEPLOYMENT_SERVER_IP:$DEPLOYMENT_PATH
                             ssh -i key.pem deployer@$DEPLOYMENT_SERVER_IP "cd $DEPLOYMENT_PATH && npm install && npm start &"
-                        """
+                        '''
                     }
                 }
             }
