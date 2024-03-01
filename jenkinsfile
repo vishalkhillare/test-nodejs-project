@@ -56,9 +56,9 @@ pipeline {
                                 echo "yes clicked"
                                 dir /b
                                 icacls %userprofile%\\.ssh\\key.pem /inheritance:r /remove BUILTIN\\Users                                
-                                scp -v -r -i key.pem ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
+                                scp -v -r -i %userprofile%\\.ssh\\key.pem ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
                                 echo "transfered current all files"
-                                ssh -i key.pem ubuntu@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"
+                                ssh -i %userprofile%\\.ssh\\key.pem ubuntu@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"
                                 echo "*******************"
                             '''
                         }
