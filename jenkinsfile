@@ -50,11 +50,17 @@ pipeline {
                             '''
                         } else {
                             bat '''
-                                type nul > known_hosts
-                                ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %SDLCCORP%\\tests\\.ssh\\known_hosts
+                                type nul > %userprofile%\\.ssh\\known_hosts
+                                echo "known host created"
+                                ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %userprofile%\\.ssh\\known_hosts
+                                echo "yes clicked"
                                 icacls key.pem /inheritance:r /remove BUILTIN\\Users
+                                echo "chmod done"
+                                dir /b
                                 scp -v -r -i key.pem ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
+                                echo "transfered current all files"
                                 ssh -i key.pem ubuntu@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"
+                                echo "*******************"
                             '''
                         }
                     }
