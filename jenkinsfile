@@ -54,7 +54,7 @@ pipeline {
                                 echo "known host created"
                                 ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %userprofile%\\.ssh\\known_hosts
                                 echo "yes clicked"
-                                icacls key.pem /inheritance:r /remove BUILTIN\\Users
+                                icacls %userprofile%\\key.pem /inheritance:r /remove BUILTIN\\Users
                                 echo "chmod done"
                                 dir /b
                                 scp -v -r -i key.pem ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
