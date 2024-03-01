@@ -58,7 +58,7 @@ pipeline {
                                 ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %SDLCCORP\tests%\\.ssh\\known_hosts
                                 type nul > key.pem
                                 echo %SSH_KEY_CONTENTS% >> key.pem
-                                icacls key.pem /inheritance:r /grant:r "%SDLCCORP\tests%:R"
+                                icacls key.pem /grant:r Administrators:(F)
                                 scp -v -r -i key.pem ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
                                 ssh -i key.pem ubuntu@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"
                             '''
