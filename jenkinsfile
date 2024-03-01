@@ -54,8 +54,8 @@ pipeline {
                                 type nul > %userprofile%\\.ssh\\known_hosts
                                 ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %userprofile%\\.ssh\\known_hosts
                                 type nul > %userprofile%\\.ssh\\key1.pem
-                                echo %SSH_KEY_CONTENTS% >> %userprofile%\\.ssh\\key1.pem
-                                echo %SSH_KEY_CONTENTS% >> %userprofile%\\.ssh\\key2.pem
+                                echo %SSH_KEY_CONTENTS% > %userprofile%\\.ssh\\key1.pem
+                                echo %SSH_KEY_CONTENTS% > %userprofile%\\.ssh\\key2.pem
                                 dir /b
                                 icacls %userprofile%\\.ssh\\key1.pem /inheritance:r /remove BUILTIN\\Users                                
                                 scp -v -r -i %userprofile%\\.ssh\\key1.pem ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
