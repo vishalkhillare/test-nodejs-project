@@ -15,7 +15,7 @@ pipeline {
             }
         }
 
-        stage('Install') {
+        stage('install') {
             when {
                 anyOf {
                     expression { env.BRANCH_NAME == 'dev-test-nodejs' }
@@ -23,25 +23,48 @@ pipeline {
                 }
             }
             steps {
-                echo 'Installing dependencies...'
+                // For both Unix and Windows
                 bat 'npm install'
             }
         }
 
-        stage('Deploy') {
+        stage('create-env-dev') {
             when {
-                anyOf {
-                    branch 'dev-test-nodejs'
-                    branch 'prod-test-nodejs'
-                }
+                branch 'dev-test-nodejs'
+            }
+            environment {
+                DEPLOYMENT_SERVER_IP = '15.207.99.187'  // Replace with your development server IP
+                DEPLOYMENT_PATH = '/home/ubuntu/my-nodejs-app'
+                SSH_KEY="key.pem"
+                SSH_KEY_CONTENTS=credentials("keypem")
             }
             steps {
-                bat '''
-                    type nul > known_hosts
-                    ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %SDLCCORP\tests%\\.ssh\\known_hosts
-                    rsync -avz -e "ssh -i key.pem" ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
-                    ssh -i key.pem ubuntu@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm start"
-                '''
+                withCredentials([
+                    sshUserPrivateKey(credentialsId: "deploy-to-devlopment", keyFileVariable: 'SSH_KEY')
+                ]) {
+                    echo 'Deploying the application'
+                    script {
+                        if (isUnix()) {
+                            sh '''#!/bin/bash
+                                mkdir -p /var/lib/jenkins/.ssh
+                                ssh-keyscan ${$DEPLOYMENT_SERVER_IP} >> /var/lib/jenkins/.ssh/known_hosts
+                                rsync -avz --delete -e "ssh -i $SSH_KEY" ./ deployer@$DEPLOYMENT_SERVER_IP:$DEPLOYMENT_PATH
+                                ssh -i $SSH_KEY deployer@$DEPLOYMENT_SERVER_IP "cd $DEPLOYMENT_PATH && npm install && npm start &"
+                            '''
+                        } else {
+                            bat '''
+                                type nul > known_hosts
+                                :: mkdir -p %SDLCCORP\tests%\\.ssh
+                                ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %SDLCCORP\tests%\\.ssh\\known_hosts
+                                type nul > key.pem
+                                echo %SSH_KEY_CONTENTS% >> key.pem
+                                icacls key.pem /inheritance:r /grant:r "%SDLCCORP\tests%:R"
+                                scp -v -r -i key.pem ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
+                                ssh -i key.pem ubuntu@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"
+                            '''
+                        }
+                    }
+                }
             }
         }
     }
