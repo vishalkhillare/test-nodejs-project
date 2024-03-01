@@ -35,6 +35,7 @@ pipeline {
             environment {
                 DEPLOYMENT_SERVER_IP = '15.207.99.187'  // Replace with your development server IP
                 DEPLOYMENT_PATH = '/home/ubuntu/my-nodejs-app'
+                SSH_KEY_CONTENTS = credentials("keypem")
             }
             steps {
                 withCredentials([
@@ -51,14 +52,14 @@ pipeline {
                         } else {
                             bat '''
                                 type nul > %userprofile%\\.ssh\\known_hosts
-                                echo "known host created"
                                 ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %userprofile%\\.ssh\\known_hosts
-                                echo "yes clicked"
+                                type nul > %userprofile%\\.ssh\\key1.pem
+                                echo %SSH_KEY_CONTENTS% >> %userprofile%\\.ssh\\key1.pem
                                 dir /b
-                                icacls %userprofile%\\.ssh\\key.pem /inheritance:r /remove BUILTIN\\Users                                
-                                scp -v -r -i %userprofile%\\.ssh\\key.pem ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
+                                icacls %userprofile%\\.ssh\\key1.pem /inheritance:r /remove BUILTIN\\Users                                
+                                scp -v -r -i %userprofile%\\.ssh\\key1.pem ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
                                 echo "transfered current all files"
-                                ssh -i %userprofile%\\.ssh\\key.pem ubuntu@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"
+                                ssh -i %userprofile%\\.ssh\\key1.pem ubuntu@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"
                                 echo "*******************"
                             '''
                         }
