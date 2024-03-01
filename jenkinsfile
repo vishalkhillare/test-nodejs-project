@@ -35,33 +35,26 @@ pipeline {
             environment {
                 DEPLOYMENT_SERVER_IP = '15.207.99.187'  // Replace with your development server IP
                 DEPLOYMENT_PATH = '/home/ubuntu/my-nodejs-app'
-                SSH_KEY="key.pem"
-                SSH_KEY_CONTENTS=credentials("keypem")
             }
             steps {
                 withCredentials([
-                    sshUserPrivateKey(credentialsId: "deploy-to-devlopment", keyFileVariable: 'SSH_KEY')
+                    sshUserPrivateKey(credentialsId: 'deploy-to-devlopment', keyFileVariable: 'SSH_KEY')
                 ]) {
-                    echo 'Deploying the application'
                     script {
                         if (isUnix()) {
-                            sh '''#!/bin/bash
+                            sh '''
                                 mkdir -p /var/lib/jenkins/.ssh
-                                ssh-keyscan ${$DEPLOYMENT_SERVER_IP} >> /var/lib/jenkins/.ssh/known_hosts
-                                rsync -avz --delete -e "ssh -i $SSH_KEY" ./ deployer@$DEPLOYMENT_SERVER_IP:$DEPLOYMENT_PATH
-                                ssh -i $SSH_KEY deployer@$DEPLOYMENT_SERVER_IP "cd $DEPLOYMENT_PATH && npm install && npm start &"
+                                ssh-keyscan ${DEPLOYMENT_SERVER_IP} >> /var/lib/jenkins/.ssh/known_hosts
+                                rsync -avz --delete -e "ssh -i ${SSH_KEY}" ./ deployer@${DEPLOYMENT_SERVER_IP}:${DEPLOYMENT_PATH}
+                                ssh -i ${SSH_KEY} deployer@${DEPLOYMENT_SERVER_IP} "cd ${DEPLOYMENT_PATH} && npm install && npm start &"
                             '''
                         } else {
                             bat '''
-                                bat 'mkdir "%SDLCCORP%\\tests\\.ssh" 2>nul'
-                                bat 'type nul > "%SDLCCORP%\\tests\\.ssh\\known_hosts"'
-                                bat 'ssh-keyscan %DEPLOYMENT_SERVER_IP% >> "%SDLCCORP%\\tests\\.ssh\\known_hosts"'
-                                bat 'takeown /F key.pem'
-                                bat 'icacls key.pem /inheritance:r /grant:r "%USERNAME%:R"'
-                                bat 'scp -v -r -i key.pem ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%'
-                                bat 'ssh -i key.pem ubuntu@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"'
-
-
+                                type nul > known_hosts
+                                ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %SDLCCORP%\\tests\\.ssh\\known_hosts
+                                bat 'icacls key.pem /inheritance:r /remove BUILTIN\\Users'
+                                scp -v -r -i key.pem ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
+                                ssh -i key.pem ubuntu@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"
                             '''
                         }
                     }
