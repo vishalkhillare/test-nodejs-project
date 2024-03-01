@@ -54,22 +54,22 @@ pipeline {
                         } else {
                             bat '''
                                 // Ensure that the .ssh directory exists
-                                bat 'mkdir %SDLCCORP%\\tests\\.ssh 2>nul'
+                                'mkdir %SDLCCORP%\\tests\\.ssh 2>nul'
                                 // Create an empty known_hosts file
-                                bat 'type nul > %SDLCCORP%\\tests\\.ssh\\known_hosts'
+                                 'type nul > %SDLCCORP%\\tests\\.ssh\\known_hosts'
 
                                 // Capture SSH server key and append it to known_hosts file
-                                bat 'ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %SDLCCORP%\\tests\\.ssh\\known_hosts'
+                                 'ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %SDLCCORP%\\tests\\.ssh\\known_hosts'
 
                                 // Take ownership of key.pem file
-                                bat 'takeown /F key.pem'
+                                 'takeown /F key.pem'
 
                                 // Adjust permissions of key.pem file
-                                bat 'icacls key.pem /inheritance:r /grant:r "%USERNAME%:R"'
+                                 'icacls key.pem /inheritance:r /grant:r "%USERNAME%:R"'
 
                                 // Execute SSH commands
-                                bat 'scp -v -r -i key.pem ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%'
-                                bat 'ssh -i key.pem ubuntu@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"'
+                                 'scp -v -r -i key.pem ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%'
+                                 'ssh -i key.pem ubuntu@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"'
 
                             '''
                         }
