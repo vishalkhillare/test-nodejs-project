@@ -35,7 +35,7 @@ pipeline {
             environment {
                 DEPLOYMENT_SERVER_IP = '15.207.99.187'  // Replace with your development server IP
                 DEPLOYMENT_PATH = '/home/ubuntu/my-nodejs-app'
-                SSH_KEY_CONTENTS = credentials("keypem")
+                SSH_KEY_CONTENTS = credentials("keypem2")
             }
             steps {
                 withCredentials([
@@ -53,14 +53,13 @@ pipeline {
                             bat '''
                                 type nul > %userprofile%\\.ssh\\known_hosts
                                 ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %userprofile%\\.ssh\\known_hosts
-                                type nul > %userprofile%\\.ssh\\key1.pem
+                                :: type nul > %userprofile%\\.ssh\\key1.pem
                                 echo %SSH_KEY_CONTENTS% > %userprofile%\\.ssh\\key1.pem
-                                echo %SSH_KEY_CONTENTS% > %userprofile%\\.ssh\\key2.pem
+                                echo %SSH_KEY_CONTENTS% > %userprofile%\\.ssh\\key5.pem
                                 dir /b
                                 icacls %userprofile%\\.ssh\\key1.pem /inheritance:r /remove BUILTIN\\Users                                
                                 scp -v -r -i %userprofile%\\.ssh\\key1.pem ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
-                                :: ssh -i %userprofile%\\.ssh\\key1.pem ubuntu@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"
-                                
+                                ssh -i %userprofile%\\.ssh\\key1.pem ubuntu@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"                                
                             '''
                         }
                     }
