@@ -57,7 +57,7 @@ pipeline {
                                 :: mkdir -p %SDLCCORP\tests%\\.ssh
                                 ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %SDLCCORP\tests%\\.ssh\\known_hosts             
                                 :: Adjust permissions of key.pem file
-                                icacls key.pem /inheritance:r /remove BUILTIN\Users
+                                icacls key.pem /inheritance:r /grant:r "%USERNAME%:R"
                                 :: Execute SSH commands
                                 scp -v -r -i key.pem ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
                                 ssh -i key.pem ubuntu@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"
