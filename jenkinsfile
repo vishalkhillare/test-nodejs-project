@@ -55,9 +55,7 @@ pipeline {
                             bat '''
                                 type nul > known_hosts
                                 :: mkdir -p %SDLCCORP\tests%\\.ssh
-                                ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %SDLCCORP\tests%\\.ssh\\known_hosts
-                                type nul > key.pem
-                                echo %SSH_KEY_CONTENTS% >> key.pem
+                                ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %SDLCCORP\tests%\\.ssh\\known_hosts             
                                 bat 'icacls key.pem /inheritance:r /remove BUILTIN\\Users'
                                 scp -v -r -i key.pem ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
                                 ssh -i key.pem ubuntu@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"
