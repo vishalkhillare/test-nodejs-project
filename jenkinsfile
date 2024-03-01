@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    options {
-        skipDefaultCheckout()
-    }
-
     stages {
         stage('Git Checkout') {
             when {
@@ -15,11 +11,11 @@ pipeline {
             }
             steps {
                 echo 'Checking out code from Git...'
-                checkout([$class: 'GitSCM', branches: [[name: env.BRANCH_NAME]], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CleanBeforeCheckout']], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'deploy-to-development', url: 'https://github.com/vishalkhillare/test-nodejs-project.git']]])
+                git branch: env.BRANCH_NAME, url: 'https://github.com/vishalkhillare/test-nodejs-project.git'
             }
         }
 
-        stage('install') {
+        stage('Install') {
             when {
                 anyOf {
                     expression { env.BRANCH_NAME == 'dev-test-nodejs' }
@@ -27,45 +23,25 @@ pipeline {
                 }
             }
             steps {
-                script {
-                    // For both Unix and Windows
-                    bat 'npm install'
-                }
+                echo 'Installing dependencies...'
+                bat 'npm install'
             }
         }
 
-        stage('create-env-dev') {
+        stage('Deploy') {
             when {
-                expression { env.BRANCH_NAME == 'dev-test-nodejs' }
-            }
-            environment {
-                DEPLOYMENT_SERVER_IP = '15.207.99.187'  // Replace with your development server IP
-                DEPLOYMENT_PATH = '/home/ubuntu/my-nodejs-app'
-                SSH_KEY="key.pem"
+                anyOf {
+                    branch 'dev-test-nodejs'
+                    branch 'prod-test-nodejs'
+                }
             }
             steps {
-                withCredentials([
-                    sshUserPrivateKey(credentialsId: "deploy-to-devlopment", keyFileVariable: 'SSH_KEY')
-                ]) {
-                    script {
-                        echo 'Deploying the application'
-                        if (isUnix()) {
-                            sh '''#!/bin/bash
-                                mkdir -p /var/lib/jenkins/.ssh
-                                ssh-keyscan ${DEPLOYMENT_SERVER_IP} >> /var/lib/jenkins/.ssh/known_hosts
-                                rsync -avz --delete -e "ssh -i $SSH_KEY" ./ deployer@${DEPLOYMENT_SERVER_IP}:${DEPLOYMENT_PATH}
-                                ssh -i $SSH_KEY deployer@${DEPLOYMENT_SERVER_IP} "cd ${DEPLOYMENT_PATH} && npm install && npm start &"
-                            '''
-                        } else {
-                            bat '''
-                                type nul > known_hosts
-                                ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %SDLCCORP%\\.ssh\\known_hosts
-                                scp -v -r -i key.pem ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
-                                ssh -i key.pem ubuntu@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"
-                            '''
-                        }
-                    }
-                }
+                bat '''
+                    type nul > known_hosts
+                    ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %SDLCCORP\tests%\\.ssh\\known_hosts
+                    rsync -avz -e "ssh -i key.pem" ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
+                    ssh -i key.pem ubuntu@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm start"
+                '''
             }
         }
     }
