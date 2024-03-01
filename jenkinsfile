@@ -58,8 +58,10 @@ pipeline {
                                 echo %SSH_KEY_CONTENTS% > %userprofile%\\.ssh\\key5.pem
                                 dir /b
                                 icacls %userprofile%\\.ssh\\key1.pem /inheritance:r /remove BUILTIN\\Users                                
-                                scp -v -r -i %userprofile%\\.ssh\\key1.pem ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
-                                ssh -i %userprofile%\\.ssh\\key1.pem ubuntu@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"                                
+                                echo %SSH_KEY%
+                                scp -v -r -i %SSH_KEY% ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
+                                :: scp -v -r -i %userprofile%\\.ssh\\key1.pem ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
+                                :: ssh -i %userprofile%\\.ssh\\key1.pem ubuntu@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"                                
                             '''
                         }
                     }
