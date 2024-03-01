@@ -12,6 +12,12 @@ pipeline {
             steps {
                 echo 'Checking out code from Git...'
                 git branch: env.BRANCH_NAME, url: 'https://github.com/vishalkhillare/test-nodejs-project.git'
+                script {
+                    // Exclude key.pem from git clean in Unix-like systems
+                    sh 'git clean -fdx -e key.pem'
+                    // Exclude key.pem from git clean in Windows
+                    bat 'git clean -fdx -e key.pem'
+                }
             }
         }
 
@@ -23,8 +29,8 @@ pipeline {
                 }
             }
             steps {
-                // For both Unix and Windows
                 script {
+                    // For both Unix and Windows
                     bat 'npm install'
                 }
             }
@@ -41,7 +47,7 @@ pipeline {
             }
             steps {
                 withCredentials([
-                    sshUserPrivateKey(credentialsId: "deploy-to-devlopment", keyFileVariable: 'SSH_KEY')
+                    sshUserPrivateKey(credentialsId: "deploy-to-development", keyFileVariable: 'SSH_KEY')
                 ]) {
                     script {
                         echo 'Deploying the application'
@@ -75,4 +81,3 @@ pipeline {
         }
     }
 }
-
