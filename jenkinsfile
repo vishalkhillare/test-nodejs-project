@@ -24,8 +24,12 @@ pipeline {
             }
             steps {
                 script {
-                    // Use 'npm ci' for production to ensure reproducibility
-                    sh 'npm ci'
+                    // For both Unix and Windows
+                    if (isUnix()) {
+                        sh 'npm install'
+                    } else {
+                        bat 'npm install'
+                    }
                 }
             }
         }
