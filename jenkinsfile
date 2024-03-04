@@ -49,10 +49,9 @@ pipeline {
                     ]) {
                         // Simplified script for both Unix and Windows
                         sh '''
-                            mkdir -p ~/.ssh
                             ssh-keyscan ${DEPLOYMENT_SERVER_IP} >> ~/.ssh/known_hosts
-                            rsync -avz --delete -e "ssh -i ${SSH_KEY}" ./ deployer@${DEPLOYMENT_SERVER_IP}:${DEPLOYMENT_PATH}
-                            ssh -i ${SSH_KEY} deployer@${DEPLOYMENT_SERVER_IP} "cd ${DEPLOYMENT_PATH} && npm install && npm start &"
+                            rsync -avz --delete -e "ssh -i ${SSH_KEY}" ./ ubuntu@${DEPLOYMENT_SERVER_IP}:${DEPLOYMENT_PATH}
+                            ssh -i ${SSH_KEY} ubuntu@${DEPLOYMENT_SERVER_IP} "cd ${DEPLOYMENT_PATH} && npm install && npm start &"
                         '''
                     }
                 }
