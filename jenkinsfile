@@ -39,7 +39,7 @@ pipeline {
                 expression { env.BRANCH_NAME == 'dev-test-nodejs' }
             }
             environment {
-                DEPLOYMENT_SERVER_IP = '15.207.99.187'  // Replace with your development server IP
+                DEPLOYMENT_SERVER_IP = '13.201.46.186'  // Replace with your development server IP
                 DEPLOYMENT_PATH = '/home/ubuntu/my-nodejs-app'
             }
             steps {
