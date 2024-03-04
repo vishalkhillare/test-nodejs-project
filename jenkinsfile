@@ -23,56 +23,33 @@ pipeline {
                 }
             }
             steps {
-                // For both Unix and Windows
-                if (isUnix()) {
-                    sh '''
-                        npm install
-                    '''
-                } else {
-                    bat '''
-                        npm install
-                    '''
+                script {
+                    // Use 'npm ci' for production to ensure reproducibility
+                    sh 'npm ci'
                 }
             }
         }
-    }
 
         stage('create-env-dev') {
             when {
-                branch 'dev-test-nodejs'
+                expression { env.BRANCH_NAME == 'dev-test-nodejs' }
             }
             environment {
                 DEPLOYMENT_SERVER_IP = '15.207.99.187'  // Replace with your development server IP
                 DEPLOYMENT_PATH = '/home/ubuntu/my-nodejs-app'
-                SSH_KEY_CONTENTS = credentials("keypem2")
             }
             steps {
-                withCredentials([
-                    sshUserPrivateKey(credentialsId: 'deploy-to-devlopment', keyFileVariable: 'SSH_KEY')
-                ]) {
-                    script {
-                        if (isUnix()) {
-                            sh '''
-                                mkdir -p /var/lib/jenkins/.ssh
-                                ssh-keyscan ${DEPLOYMENT_SERVER_IP} >> /var/lib/jenkins/.ssh/known_hosts
-                                rsync -avz --delete -e "ssh -i ${SSH_KEY}" ./ deployer@${DEPLOYMENT_SERVER_IP}:${DEPLOYMENT_PATH}
-                                ssh -i ${SSH_KEY} deployer@${DEPLOYMENT_SERVER_IP} "cd ${DEPLOYMENT_PATH} && npm install && npm start &"
-                            '''
-                        } else {
-                            bat '''
-                                type nul > %userprofile%\\.ssh\\known_hosts
-                                ssh-keyscan %DEPLOYMENT_SERVER_IP% >> %userprofile%\\.ssh\\known_hosts
-                                :: type nul > %userprofile%\\.ssh\\key1.pem
-                                echo %SSH_KEY_CONTENTS% > %userprofile%\\.ssh\\key1.pem
-                                echo %SSH_KEY_CONTENTS% > %userprofile%\\.ssh\\key5.pem
-                                dir /b
-                                icacls %userprofile%\\.ssh\\key1.pem /inheritance:r /remove BUILTIN\\Users                                
-                                scp -v -r * ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%                                
-                                ssh ubuntu@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"
-                                :: scp -v -r -i %userprofile%\\.ssh\\key1.pem ./ ubuntu@%DEPLOYMENT_SERVER_IP%:%DEPLOYMENT_PATH%
-                                :: ssh -i %userprofile%\\.ssh\\key1.pem ubuntu@%DEPLOYMENT_SERVER_IP% "cd %DEPLOYMENT_PATH% && npm install && start npm start"
-                            '''
-                        }
+                script {
+                    withCredentials([
+                        sshUserPrivateKey(credentialsId: 'deploy-to-devlopment', keyFileVariable: 'SSH_KEY')
+                    ]) {
+                        // Simplified script for both Unix and Windows
+                        sh '''
+                            mkdir -p ~/.ssh
+                            ssh-keyscan ${DEPLOYMENT_SERVER_IP} >> ~/.ssh/known_hosts
+                            rsync -avz --delete -e "ssh -i ${SSH_KEY}" ./ deployer@${DEPLOYMENT_SERVER_IP}:${DEPLOYMENT_PATH}
+                            ssh -i ${SSH_KEY} deployer@${DEPLOYMENT_SERVER_IP} "cd ${DEPLOYMENT_PATH} && npm install && npm start &"
+                        '''
                     }
                 }
             }
