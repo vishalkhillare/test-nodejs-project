@@ -24,9 +24,18 @@ pipeline {
             }
             steps {
                 // For both Unix and Windows
-                bat 'npm install'
+                if (isUnix()) {
+                    sh '''
+                        npm install
+                    '''
+                } else {
+                    bat '''
+                        npm install
+                    '''
+                }
             }
         }
+    }
 
         stage('create-env-dev') {
             when {
